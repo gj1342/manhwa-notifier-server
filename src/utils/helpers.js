@@ -1,0 +1,1 @@
+exports.absoluteUrl = (relativeUrl, baseUrl) => new URL(relativeUrl, baseUrl).href; 

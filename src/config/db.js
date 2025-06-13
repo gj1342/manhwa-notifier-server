@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const connectDB = async () => {
   const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/manhwa-notifier';
@@ -12,4 +12,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB; 
+export default connectDB; 

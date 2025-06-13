@@ -1,14 +1,13 @@
-const express = require('express');
+import express from 'express';
+import routes from './routes/index.js';
+import errorHandler from './middleware/errorHandler.js';
 
 const app = express();
 
 app.use(express.json());
 
-const routes = require('./routes');
-const errorHandler = require('./middleware/errorHandler');
-
 app.use('/api', routes);
 
 app.use(errorHandler);
 
-module.exports = app; 
+export default app; 

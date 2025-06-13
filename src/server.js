@@ -1,7 +1,7 @@
-const http = require('http');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const app = require('./app');
+import http from 'http';
+import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import app from './app.js';
 
 dotenv.config();
 

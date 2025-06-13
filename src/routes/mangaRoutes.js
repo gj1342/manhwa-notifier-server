@@ -1,12 +1,12 @@
-const { Router } = require('express');
-const auth = require('../middleware/authMiddleware');
-const {
+import { Router } from 'express';
+import auth from '../middleware/authMiddleware.js';
+import {
   createManga,
   getManga,
   getMangaById,
   updateManga,
   deleteManga,
-} = require('../controllers/mangaController');
+} from '../controllers/mangaController.js';
 
 const router = Router();
 
@@ -15,4 +15,4 @@ router.use(auth);
 router.route('/').post(createManga).get(getManga);
 router.route('/:id').get(getMangaById).put(updateManga).delete(deleteManga);
 
-module.exports = router; 
+export default router; 

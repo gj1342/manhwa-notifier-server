@@ -1,4 +1,7 @@
-module.exports = {
-  secret: process.env.JWT_SECRET || 'secret',
-  expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+const secret = process.env.JWT_SECRET || 'secret';
+const expiresIn = process.env.JWT_EXPIRES_IN || '1h';
+
+export default {
+  secret,
+  expiresIn
 }; 

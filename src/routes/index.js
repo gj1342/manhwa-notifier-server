@@ -1,10 +1,10 @@
-const { Router } = require('express');
-const authRoutes = require('./authRoutes');
-const mangaRoutes = require('./mangaRoutes');
+import { Router } from 'express';
+import authRoutes from './authRoutes.js';
+import mangaRoutes from './mangaRoutes.js';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/manga', mangaRoutes);
 
-module.exports = router; 
+export default router; 

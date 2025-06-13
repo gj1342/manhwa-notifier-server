@@ -28,11 +28,6 @@ export const STATUS_CODES = {
   SERVER_ERROR: 500,
 };
 
-export const MONGODB_OPTIONS = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
-
 export const COLLECTION_NAMES = {
   USERS: 'users',
   TRACKED_MANGA: 'trackedmanga',

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { MONGODB_OPTIONS, ERROR_MESSAGES, RESPONSE_MESSAGES } from './common.js';
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from './common.js';
 
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI;
@@ -8,7 +8,7 @@ const connectDB = async () => {
     process.exit(1);
   }
   try {
-    await mongoose.connect(uri, MONGODB_OPTIONS);
+    await mongoose.connect(uri);
     console.log(RESPONSE_MESSAGES.MONGODB_CONNECTED);
   } catch (err) {
     console.error(err);

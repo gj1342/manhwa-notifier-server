@@ -1,7 +1,7 @@
 # Manhwa Notifier API
 
 Backend service for the **Manhwa / Manga Update Notifier** application.
-It exposes a RESTful JSON API that lets users register, authenticate and manage a personalised list of manga URLs to track.  The service is also responsible for scraping each tracked site on a schedule and sending email notifications when new chapters are detected.
+It exposes a RESTful JSON API that lets users register, authenticate and manage a personalised list of manga URLs to track. The service is also responsible for scraping each tracked site on a schedule and sending email notifications when new chapters are detected.
 
 ---
 
@@ -15,6 +15,7 @@ It exposes a RESTful JSON API that lets users register, authenticate and manage 
 • **Scheduling** – node-cron (periodic scraping jobs)  
 • **HTTP** – Axios (for outbound requests)  
 • **Scraping** – Cheerio (static) & optional Puppeteer/Playwright for dynamic sites  
+• **Validation** – express-validator  
 • **Env Mgmt** – dotenv
 
 ---
@@ -24,13 +25,14 @@ It exposes a RESTful JSON API that lets users register, authenticate and manage 
 ```text
 Manhwa-Notifier-Api/
 ├── src/
-│   ├── config/          # Environment & database configuration
+│   ├── config/          # Environment, database, endpoint configuration
+│   │   ├── endpoints.js # Centralized API endpoint constants
 │   ├── controllers/     # Route handlers (auth, manga CRUD)
-│   ├── middleware/      # Express middleware (auth, global errors)
+│   ├── middleware/      # Express middleware (auth, validation, global errors)
 │   ├── models/          # Mongoose schemas (User, TrackedManga, ScrapingConfig)
 │   ├── routes/          # API route definitions, grouped by domain
 │   ├── services/        # Domain services (email, scraper)
-│   ├── utils/           # Helper/utility functions and validation
+│   ├── utils/           # Helper/utility functions
 │   ├── app.js           # Express app instance (middleware + routes)
 │   └── server.js        # Entry point – loads env, connects DB, starts server
 ├── .env                 # Local environment variables (never commit!)
@@ -49,7 +51,7 @@ Manhwa-Notifier-Api/
 2. **Configure environment** – copy `.env.example` to `.env` and fill values:
    ```ini
    PORT=5000
-   MONGO_URI=mongodb://localhost:27017/manhwa-notifier
+   MONGODB_URI=mongodb://localhost:27017/manhwa-notifier
    JWT_SECRET=supersecret
    JWT_EXPIRES_IN=1h
    EMAIL_USERNAME=your@gmail.com
@@ -58,7 +60,7 @@ Manhwa-Notifier-Api/
 3. **Run the server**
    ```bash
    npm start
-   # or: node src/server.js
+   # or: npm run dev
    ```
 
 ---
@@ -68,26 +70,34 @@ Manhwa-Notifier-Api/
 | Command | Description |
 |---------|-------------|
 | `npm start` | Launch server in production mode |
-| `npm run dev` | Launch with nodemon (requires nodemon installed globally) |
+| `npm run dev` | Launch with nodemon (auto-restart on changes) |
 
 ---
 
 ## API Endpoints (brief)
 
+All endpoint paths are centralized in `src/config/endpoints.js` and used throughout the codebase for consistency.
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST   | `/api/auth/register` | Register new user |
-| POST   | `/api/auth/login`    | User login, returns JWT |
-| POST   | `/api/manga`         | Add manga URL (auth) |
-| GET    | `/api/manga`         | List tracked manga |
-| GET    | `/api/manga/:id`     | Get single tracked manga |
-| PUT    | `/api/manga/:id`     | Update tracked manga |
-| DELETE | `/api/manga/:id`     | Delete tracked manga |
+| POST   | `/auth/register` | Register new user (with validation) |
+| POST   | `/auth/login`    | User login, returns JWT |
+| POST   | `/manga`         | Add manga URL (auth, with validation) |
+| GET    | `/manga`         | List tracked manga |
+| GET    | `/manga/:id`     | Get single tracked manga |
+| PUT    | `/manga/:id`     | Update tracked manga |
+| DELETE | `/manga/:id`     | Delete tracked manga |
+
+---
+
+## Validation Middleware
+
+Request validation is handled using `express-validator` middleware. Validation logic for user registration and tracked manga creation is defined in `src/middleware/validation.js` and applied in the relevant routes. This ensures all incoming data is checked for correctness before reaching controllers.
 
 ---
 
 ## Contributing
-Pull requests are welcome.  Please open an issue first to discuss any major changes.
+Pull requests are welcome. Please open an issue first to discuss any major changes.
 
 ---
 

@@ -1,4 +1,4 @@
-const { Schema, model, Types } = require('mongoose');
+import { Schema, model, Types } from 'mongoose';
 
 const trackedMangaSchema = new Schema(
   {
@@ -14,4 +14,4 @@ const trackedMangaSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model('TrackedManga', trackedMangaSchema); 
+export default model('TrackedManga', trackedMangaSchema); 

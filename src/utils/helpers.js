@@ -1,1 +1,1 @@
-exports.absoluteUrl = (relativeUrl, baseUrl) => new URL(relativeUrl, baseUrl).href; 
+export const absoluteUrl = (relativeUrl, baseUrl) => new URL(relativeUrl, baseUrl).href; 

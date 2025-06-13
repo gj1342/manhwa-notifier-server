@@ -1,2 +1,2 @@
 // Placeholder for validation schemas (e.g., using Joi)
-exports.validate = () => true; 
+export const validate = () => true; 

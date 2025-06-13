@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+import { Schema, model } from 'mongoose';
 
 const scrapingConfigSchema = new Schema(
   {
@@ -11,4 +11,4 @@ const scrapingConfigSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model('ScrapingConfig', scrapingConfigSchema); 
+export default model('ScrapingConfig', scrapingConfigSchema); 

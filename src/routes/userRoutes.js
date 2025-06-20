@@ -9,6 +9,7 @@ import userService from '../services/userService.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import { API_ENDPOINTS } from '../config/endpoints.js';
 import { ForbiddenError, NotFoundError } from '../utils/errors.js';
+import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../config/common.js';
 
 const router = Router();
 
@@ -63,7 +64,7 @@ router.get(API_ENDPOINTS.USERS.BY_ID, authMiddleware, async (req, res, next) => 
   try {
     if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw new ForbiddenError();
     const user = await userService.getUser(req.params.id);
-    if (!user) throw new NotFoundError('User not found');
+    if (!user) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
     res.status(200).json(user);
   } catch (err) {
     next(err);
@@ -136,7 +137,7 @@ router.delete(API_ENDPOINTS.USERS.BY_ID, authMiddleware, async (req, res, next) 
   try {
     if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw new ForbiddenError();
     await userService.deleteUser(req.params.id, req.user);
-    res.status(200).json({ message: 'User soft deleted' });
+    res.status(200).json({ message: RESPONSE_MESSAGES.USER_SOFT_DELETED });
   } catch (err) {
     next(err);
   }
@@ -169,7 +170,7 @@ router.post(API_ENDPOINTS.USERS.HARD_DELETE, authMiddleware, async (req, res, ne
   try {
     userService.requireRole(req.user, 'admin');
     await userService.hardDeleteUser(req.params.id, req.user);
-    res.status(200).json({ message: 'User hard deleted' });
+    res.status(200).json({ message: RESPONSE_MESSAGES.USER_HARD_DELETED });
   } catch (err) {
     next(err);
   }

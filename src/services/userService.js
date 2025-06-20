@@ -17,7 +17,7 @@ import {
 } from '../utils/errors.js';
 
 const requireRole = (user, role) => {
-  if (!user || user.role !== role) throw new ForbiddenError('Forbidden: insufficient privileges');
+  if (!user || user.role !== role) throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN_INSUFFICIENT_PRIVILEGES);
 };
 
 const getUser = async (id, params = {}) => {
@@ -45,8 +45,8 @@ const createUser = async (data, origin) => {
   const trimmedData = trimAll(data);
   const { email, password, lang = 'en', ...otherData } = trimmedData;
   const existingUser = await userRepository.getUser({ email });
-  if (existingUser) throw new ConflictError('User already exists');
-  if (!isStrongPassword(password)) throw new BadRequestError('Password does not meet security requirements');
+  if (existingUser) throw new ConflictError(ERROR_MESSAGES.USER_ALREADY_EXISTS);
+  if (!isStrongPassword(password)) throw new BadRequestError(ERROR_MESSAGES.PASSWORD_REQUIREMENTS);
   const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
   const verificationToken = crypto.randomBytes(32).toString('hex');
   const verificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 24);
@@ -71,7 +71,7 @@ const createUser = async (data, origin) => {
 
 const verifyEmail = async (token) => {
   const user = await userRepository.getUser({ emailVerificationToken: token });
-  if (!user || !user.emailVerificationExpires || user.emailVerificationExpires < new Date()) throw new BadRequestError('Invalid or expired verification token');
+  if (!user || !user.emailVerificationExpires || user.emailVerificationExpires < new Date()) throw new BadRequestError(ERROR_MESSAGES.INVALID_VERIFICATION_TOKEN);
   const updatedUser = await userRepository.updateUser(user._id.toString(), {
     isEmailVerified: true,
     emailVerificationToken: null,
@@ -89,7 +89,7 @@ const updateUser = async (data, actingUser) => {
   if (trimmedData.role && actingUser) requireRole(actingUser, 'admin');
   delete trimmedData._id;
   if (trimmedData.password) {
-    if (!isStrongPassword(trimmedData.password)) throw new BadRequestError('Password does not meet security requirements');
+    if (!isStrongPassword(trimmedData.password)) throw new BadRequestError(ERROR_MESSAGES.PASSWORD_REQUIREMENTS);
     trimmedData.password = await bcrypt.hash(trimmedData.password, BCRYPT_SALT_ROUNDS);
   }
   trimmedData.lastActive = new Date();
@@ -111,7 +111,7 @@ const hardDeleteUser = async (id, actingUser) => {
 const loginUser = async ({ email, password }) => {
   const user = await userRepository.getUser({ email }, { select: '+password +role +isEmailVerified' });
   if (!user) throw new UnauthorizedError(ERROR_MESSAGES.INVALID_CREDENTIALS);
-  if (!user.isEmailVerified) throw new UnauthorizedError('Email not verified');
+  if (!user.isEmailVerified) throw new UnauthorizedError(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) throw new UnauthorizedError(ERROR_MESSAGES.INVALID_CREDENTIALS);
   const tokenUser = { id: user._id, email: user.email, role: user.role };
@@ -177,8 +177,8 @@ const requestPasswordReset = async (email, lang = 'en') => {
 
 const resetPassword = async (token, newPassword) => {
   const user = await userRepository.getUser({ passwordResetToken: token });
-  if (!user || !user.passwordResetExpires || user.passwordResetExpires < new Date()) throw new BadRequestError('Invalid or expired reset token');
-  if (!isStrongPassword(newPassword)) throw new BadRequestError('Password does not meet security requirements');
+  if (!user || !user.passwordResetExpires || user.passwordResetExpires < new Date()) throw new BadRequestError(ERROR_MESSAGES.INVALID_RESET_TOKEN);
+  if (!isStrongPassword(newPassword)) throw new BadRequestError(ERROR_MESSAGES.PASSWORD_REQUIREMENTS);
   const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
   await userRepository.updateUser(user._id.toString(), { password: hashedPassword, passwordResetToken: null, passwordResetExpires: null });
   return true;

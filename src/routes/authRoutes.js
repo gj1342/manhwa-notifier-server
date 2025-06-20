@@ -149,6 +149,6 @@ router.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, resetPassword);
  *         description: Unauthorized (no or invalid token)
  */
 // Logout endpoint
-router.post('/logout', authMiddleware, logout);
+router.post(API_ENDPOINTS.AUTH.LOGOUT, authMiddleware, logout);
 
 export default router; 

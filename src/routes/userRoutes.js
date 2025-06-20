@@ -8,6 +8,7 @@ import { Router } from 'express';
 import userService from '../services/userService.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import { API_ENDPOINTS } from '../config/endpoints.js';
+import { ForbiddenError, NotFoundError } from '../utils/errors.js';
 
 const router = Router();
 
@@ -60,9 +61,9 @@ router.get(API_ENDPOINTS.USERS.ROOT, authMiddleware, async (req, res, next) => {
  */
 router.get(API_ENDPOINTS.USERS.BY_ID, authMiddleware, async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw { error: 'Forbidden', status: 403 };
+    if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw new ForbiddenError();
     const user = await userService.getUser(req.params.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) throw new NotFoundError('User not found');
     res.status(200).json(user);
   } catch (err) {
     next(err);
@@ -100,7 +101,7 @@ router.get(API_ENDPOINTS.USERS.BY_ID, authMiddleware, async (req, res, next) => 
  */
 router.put(API_ENDPOINTS.USERS.BY_ID, authMiddleware, async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw { error: 'Forbidden', status: 403 };
+    if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw new ForbiddenError();
     const updated = await userService.updateUser({ ...req.body, _id: req.params.id }, req.user);
     res.status(200).json(updated);
   } catch (err) {
@@ -133,7 +134,7 @@ router.put(API_ENDPOINTS.USERS.BY_ID, authMiddleware, async (req, res, next) => 
  */
 router.delete(API_ENDPOINTS.USERS.BY_ID, authMiddleware, async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw { error: 'Forbidden', status: 403 };
+    if (req.user.role !== 'admin' && req.user.id !== req.params.id) throw new ForbiddenError();
     await userService.deleteUser(req.params.id, req.user);
     res.status(200).json({ message: 'User soft deleted' });
   } catch (err) {

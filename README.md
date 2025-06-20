@@ -32,7 +32,8 @@ Manhwa-Notifier-Api/
 │   ├── models/          # Mongoose schemas (User, TrackedManga, ScrapingConfig)
 │   ├── routes/          # API route definitions, grouped by domain
 │   ├── services/        # Domain services (email, scraper)
-│   ├── utils/           # Helper/utility functions
+│   ├── repository/      # Data access logic, abstraction over models
+│   ├── utils/           # Helper/utility functions (no validation logic here)
 │   ├── app.js           # Express app instance (middleware + routes)
 │   └── server.js        # Entry point – loads env, connects DB, starts server
 ├── .env                 # Local environment variables (never commit!)
@@ -92,7 +93,9 @@ All endpoint paths are centralized in `src/config/endpoints.js` and used through
 
 ## Validation Middleware
 
-Request validation is handled using `express-validator` middleware. Validation logic for user registration and tracked manga creation is defined in `src/middleware/validation.js` and applied in the relevant routes. This ensures all incoming data is checked for correctness before reaching controllers.
+All request validation must use `express-validator` middleware defined in `src/middleware/validation.js`. Do not use or add validation logic in `src/utils/validation.js`—that file is redundant and should not be used. This ensures a single, consistent approach to input validation across the codebase.
+
+Request validation logic for user registration and tracked manga creation is defined in `src/middleware/validation.js` and applied in the relevant routes. This ensures all incoming data is checked for correctness before reaching controllers.
 
 ---
 

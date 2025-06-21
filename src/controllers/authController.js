@@ -3,7 +3,7 @@ import userRepository from '../repository/userRepository.js';
 import { ERROR_MESSAGES, RESPONSE_MESSAGES, STATUS_CODES } from '../config/common.js';
 import userService from '../services/userService.js';
 
-export const register = async (req, res, next) => {
+const register = async (req, res, next) => {
   try {
     const origin = req.headers.origin || req.get('origin') || '';
     const user = await userService.createUser(req.body, origin);
@@ -13,7 +13,7 @@ export const register = async (req, res, next) => {
   }
 };
 
-export const login = async (req, res, next) => {
+const login = async (req, res, next) => {
   try {
     const result = await userService.loginUser(req.body);
     res.status(200).json(result);
@@ -22,7 +22,7 @@ export const login = async (req, res, next) => {
   }
 };
 
-export const verifyEmail = async (req, res, next) => {
+const verifyEmail = async (req, res, next) => {
   try {
     await userService.verifyEmail(req.query.token);
     res.status(200).json({ message: RESPONSE_MESSAGES.EMAIL_VERIFIED });
@@ -31,7 +31,7 @@ export const verifyEmail = async (req, res, next) => {
   }
 };
 
-export const requestPasswordReset = async (req, res, next) => {
+const requestPasswordReset = async (req, res, next) => {
   try {
     await userService.requestPasswordReset(req.body.email);
     res.status(200).json({ message: RESPONSE_MESSAGES.PASSWORD_RESET_SENT });
@@ -40,7 +40,7 @@ export const requestPasswordReset = async (req, res, next) => {
   }
 };
 
-export const resetPassword = async (req, res, next) => {
+const resetPassword = async (req, res, next) => {
   try {
     await userService.resetPassword(req.body.token, req.body.newPassword);
     res.status(200).json({ message: RESPONSE_MESSAGES.PASSWORD_RESET_SUCCESS });
@@ -49,11 +49,30 @@ export const resetPassword = async (req, res, next) => {
   }
 };
 
-export const logout = async (req, res, next) => {
+const logout = async (req, res, next) => {
   try {
     await userService.logoutUser(req);
     res.status(200).json({ message: RESPONSE_MESSAGES.LOGOUT_SUCCESS });
   } catch (err) {
     next(err);
   }
+};
+
+const createAdmin = async (req, res, next) => {
+  try {
+    const adminUser = await userService.createAdmin(req.body);
+    res.status(201).json(adminUser);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export {
+  createAdmin,
+  register,
+  login,
+  verifyEmail,
+  requestPasswordReset,
+  resetPassword,
+  logout
 }; 

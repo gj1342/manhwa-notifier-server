@@ -1,13 +1,12 @@
 import bcrypt from 'bcryptjs';
-import { ERROR_MESSAGES, BCRYPT_SALT_ROUNDS } from '../config/common.js';
+import { ERROR_MESSAGES, BCRYPT_SALT_ROUNDS, ADMIN_CREATION_SECRET } from '../config/common.js';
 import userRepository from '../repository/userRepository.js';
 import { trimAll, generateToken } from '../utils/helpers.js';
 import { isStrongPassword } from '../utils/validation.js';
 import crypto from 'crypto';
-import { sendMail, sendLocalizedMail } from './emailService.js';
+import { sendLocalizedMail } from './emailService.js';
 import BlacklistedToken from '../models/BlacklistedToken.js';
 import jwt from 'jsonwebtoken';
-import jwtConfig from '../config/jwt.js';
 import {
   BadRequestError,
   UnauthorizedError,
@@ -24,20 +23,38 @@ const getUser = async (id, params = {}) => {
   if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
   const options = {};
   if (params.populate) options.populate = params.populate;
+  if (params.sort) options.sort = params.sort;
+  if (params.limit) options.limit = params.limit;
   if (params.select) options.select = Array.isArray(params.select) ? params.select.join(' ') : params.select;
   if (params.lean !== undefined) options.lean = params.lean;
   return userRepository.getUser(id, options);
 };
 
-const getUsers = async (params = {}) => {
-  const filter = params.query || {};
-  const options = {};
-  if (params.populate) options.populate = params.populate;
-  if (params.sort) options.sort = params.sort;
-  if (params.limit) options.limit = params.limit;
-  if (params.select) options.select = Array.isArray(params.select) ? params.select.join(' ') : params.select;
-  if (params.lean !== undefined) options.lean = params.lean;
-  return userRepository.getUsers(filter, options);
+const createAdmin = async (data) => {
+  const { email, password, secret } = data;
+
+  if (secret !== ADMIN_CREATION_SECRET) {
+    throw new ForbiddenError('Invalid secret for admin creation.');
+  }
+
+  const existingUser = await userRepository.getUser({ email });
+  if (existingUser) {
+    throw new ConflictError(ERROR_MESSAGES.USER_ALREADY_EXISTS);
+  }
+
+  if (!isStrongPassword(password)) {
+    throw new BadRequestError(ERROR_MESSAGES.PASSWORD_REQUIREMENTS);
+  }
+
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+  const adminUser = await userRepository.createUser({
+    email,
+    password: hashedPassword,
+    role: 'admin',
+    isEmailVerified: true,
+  });
+
+  return adminUser;
 };
 
 const createUser = async (data, origin) => {
@@ -72,7 +89,7 @@ const createUser = async (data, origin) => {
 const verifyEmail = async (token) => {
   const user = await userRepository.getUser({ emailVerificationToken: token });
   if (!user || !user.emailVerificationExpires || user.emailVerificationExpires < new Date()) throw new BadRequestError(ERROR_MESSAGES.INVALID_VERIFICATION_TOKEN);
-  const updatedUser = await userRepository.updateUser(user._id.toString(), {
+  await userRepository.updateUser(user._id.toString(), {
     isEmailVerified: true,
     emailVerificationToken: null,
     emailVerificationExpires: null
@@ -86,7 +103,14 @@ const updateUser = async (data, actingUser) => {
   const trimmedData = trimAll(data);
   const existingUser = await userRepository.getUser(userId);
   if (!existingUser) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
-  if (trimmedData.role && actingUser) requireRole(actingUser, 'admin');
+  
+  if (actingUser.id.toString() !== userId) {
+      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN_ACTION);
+  }
+  if (trimmedData.role) {
+      delete trimmedData.role;
+  }
+
   delete trimmedData._id;
   if (trimmedData.password) {
     if (!isStrongPassword(trimmedData.password)) throw new BadRequestError(ERROR_MESSAGES.PASSWORD_REQUIREMENTS);
@@ -98,14 +122,14 @@ const updateUser = async (data, actingUser) => {
 
 const deleteUser = async (id, actingUser) => {
   if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
-  if (actingUser) requireRole(actingUser, 'admin');
-  return userRepository.deleteUser(id);
-};
+  const user = await userRepository.getUser(id);
+  if (!user) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
 
-const hardDeleteUser = async (id, actingUser) => {
-  if (!id) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
-  if (actingUser) requireRole(actingUser, 'admin');
-  return userRepository.updateUser(id, { $unset: { deleted: 1 } }, { includeDeleted: true });
+  if (actingUser.id.toString() !== id.toString()) {
+    throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN_ACTION);
+  }
+
+  return userRepository.deleteUser(id);
 };
 
 const loginUser = async ({ email, password }) => {
@@ -188,7 +212,7 @@ const cleanUpInactiveUsers = async () => {};
 
 export default {
   getUser,
-  getUsers,
+  createAdmin,
   createUser,
   updateUser,
   deleteUser,
@@ -202,6 +226,5 @@ export default {
   resetPassword,
   verifyEmail,
   isTokenBlacklisted,
-  hardDeleteUser,
   cleanupBlacklistedTokens,
 }; 

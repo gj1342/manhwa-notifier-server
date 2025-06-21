@@ -2,6 +2,7 @@ export const API_ENDPOINTS = {
   AUTH: {
     ROOT: '/auth',
     REGISTER: '/register',
+    CREATE_ADMIN: '/create-admin',
     LOGIN: '/login',
     LOGOUT: '/logout',
     VERIFY_EMAIL: '/verify-email',

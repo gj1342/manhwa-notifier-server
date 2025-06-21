@@ -1,3 +1,12 @@
+import {
+  PORT,
+  MONGODB_URI,
+  NODE_ENV,
+  JWT_SECRET,
+  SERVER_URL,
+  ADMIN_CREATION_SECRET,
+} from './env.js';
+
 export const ERROR_MESSAGES = {
   MONGODB_URI_NOT_DEFINED: 'MONGODB_URI is not defined in environment variables',
   INVALID_CREDENTIALS: 'Invalid email or password',
@@ -57,4 +66,13 @@ export const COLLECTION_NAMES = {
   SCRAPING_CONFIG: 'scrapingconfigs',
 };
 
-export const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS, 10) || 10;
+export const BCRYPT_SALT_ROUNDS = 12;
+
+export {
+  PORT,
+  MONGODB_URI,
+  NODE_ENV,
+  JWT_SECRET,
+  SERVER_URL,
+  ADMIN_CREATION_SECRET,
+};

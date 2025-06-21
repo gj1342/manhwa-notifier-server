@@ -1,17 +1,17 @@
 import mongoose from 'mongoose';
-import { ERROR_MESSAGES, RESPONSE_MESSAGES } from './common.js';
+import { MONGODB_URI } from './common.js';
+import logger from './logger.js';
 
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    console.error(ERROR_MESSAGES.MONGODB_URI_NOT_DEFINED);
-    process.exit(1);
-  }
   try {
-    await mongoose.connect(uri);
-    console.log(RESPONSE_MESSAGES.MONGODB_CONNECTED);
+    if (!MONGODB_URI) {
+      logger.error('MongoDB URI not found. Please set MONGODB_URI in your .env file.');
+      process.exit(1);
+    }
+    await mongoose.connect(MONGODB_URI);
+    logger.info('MongoDB Connected...');
   } catch (err) {
-    console.error(err);
+    logger.error('MongoDB connection error:', err);
     process.exit(1);
   }
 };

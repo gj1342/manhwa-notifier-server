@@ -5,6 +5,7 @@ const applyQueryOptions = (query, options = {}) => {
     [].concat(options.populate).forEach(pop => query.populate(pop));
   }
   if (options.sort) query.sort(options.sort);
+  if (options.skip) query.skip(options.skip);
   if (options.limit) query.limit(options.limit);
   query.select(options.select || '-password');
   query.lean(options.lean !== false);
@@ -13,26 +14,33 @@ const applyQueryOptions = (query, options = {}) => {
 
 const normalizeCriteria = (criteria) => {
   if (typeof criteria === 'string') return { _id: criteria };
-  if (criteria && criteria.email) return { email: criteria.email };
   return criteria || {};
 };
 
-const addNotDeleted = (filter, options) => {
-  if (options && options.includeDeleted) return filter;
-  return { ...filter, deleted: false };
+const buildFilter = (baseFilter, options) => {
+  let filter = { ...baseFilter };
+  if (!options.includeDeleted) {
+    filter.deleted = { $ne: true };
+  }
+  return filter;
 };
 
 const getUser = (criteria, options = {}) => {
-  let filter = normalizeCriteria(criteria);
-  filter = addNotDeleted(filter, options);
+  const normalizedCriteria = normalizeCriteria(criteria);
+  const filter = buildFilter(normalizedCriteria, options);
   const query = User.findOne(filter);
   return applyQueryOptions(query, options).exec();
 };
 
 const getUsers = (filter = {}, options = {}) => {
-  filter = addNotDeleted(filter, options);
-  const query = User.find(filter);
+  const finalFilter = buildFilter(filter, options);
+  const query = User.find(finalFilter);
   return applyQueryOptions(query, options).exec();
+};
+
+const countUsers = (filter = {}, options = {}) => {
+  const finalFilter = buildFilter(filter, options);
+  return User.countDocuments(finalFilter).exec();
 };
 
 const createUser = async (data) => {
@@ -41,19 +49,17 @@ const createUser = async (data) => {
 };
 
 const updateUser = (criteria, updateData, options = {}) => {
-  let filter = normalizeCriteria(criteria);
-  filter = addNotDeleted(filter, options);
+  const normalizedCriteria = normalizeCriteria(criteria);
+  const filter = buildFilter(normalizedCriteria, options);
   const query = User.findOneAndUpdate(filter, updateData, { new: true });
   return applyQueryOptions(query, options).exec();
 };
 
 const deleteUser = (criteria, options = {}) => {
-  let filter = normalizeCriteria(criteria);
-  filter = addNotDeleted(filter, options);
+  const normalizedCriteria = normalizeCriteria(criteria);
+  const filter = buildFilter(normalizedCriteria, options);
   return updateUser(filter, { deleted: true }, options);
 };
-
-const searchUser = (filter = {}, options = {}) => getUsers(filter, options);
 
 export default {
   getUser,
@@ -61,5 +67,5 @@ export default {
   createUser,
   updateUser,
   deleteUser,
-  searchUser,
+  countUsers,
 };

@@ -5,7 +5,15 @@
  *   description: Authentication and account recovery endpoints
  */
 import { Router } from 'express';
-import { register, login, verifyEmail, requestPasswordReset, resetPassword, logout } from '../controllers/authController.js';
+import {
+  createAdmin,
+  register,
+  login,
+  verifyEmail,
+  requestPasswordReset,
+  resetPassword,
+  logout
+} from '../controllers/authController.js';
 import { registerValidation } from '../middleware/validation.js';
 import { validationResult } from 'express-validator';
 import { API_ENDPOINTS } from '../config/endpoints.js';
@@ -16,7 +24,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/auth/register:
+ * /auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
@@ -50,7 +58,35 @@ router.post(
 
 /**
  * @swagger
- * /api/auth/login:
+ * /auth/create-admin:
+ *   post:
+ *     summary: Create a new admin user (requires secret key)
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               secret:
+ *                 type: string
+ *                 description: The secret key for admin creation.
+ *     responses:
+ *       201:
+ *         description: Admin user created successfully.
+ *       403:
+ *         description: Invalid secret key.
+ */
+router.post(API_ENDPOINTS.AUTH.CREATE_ADMIN, authRateLimiter, createAdmin);
+
+/**
+ * @swagger
+ * /auth/login:
  *   post:
  *     summary: Login a user
  *     tags: [Auth]
@@ -73,7 +109,7 @@ router.post(API_ENDPOINTS.AUTH.LOGIN, authRateLimiter, login);
 
 /**
  * @swagger
- * /api/auth/verify-email:
+ * /auth/verify-email:
  *   get:
  *     summary: Verify user email
  *     tags: [Auth]
@@ -92,7 +128,7 @@ router.get(API_ENDPOINTS.AUTH.VERIFY_EMAIL, verifyEmail);
 
 /**
  * @swagger
- * /api/auth/request-password-reset:
+ * /auth/request-password-reset:
  *   post:
  *     summary: Request password reset
  *     tags: [Auth]
@@ -113,7 +149,7 @@ router.post(API_ENDPOINTS.AUTH.REQUEST_PASSWORD_RESET, requestPasswordReset);
 
 /**
  * @swagger
- * /api/auth/reset-password:
+ * /auth/reset-password:
  *   post:
  *     summary: Reset password
  *     tags: [Auth]
@@ -136,7 +172,7 @@ router.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, resetPassword);
 
 /**
  * @swagger
- * /api/auth/logout:
+ * /auth/logout:
  *   post:
  *     summary: Logout user (invalidate JWT)
  *     tags: [Auth]
@@ -148,7 +184,6 @@ router.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, resetPassword);
  *       401:
  *         description: Unauthorized (no or invalid token)
  */
-// Logout endpoint
 router.post(API_ENDPOINTS.AUTH.LOGOUT, authMiddleware, logout);
 
 export default router; 

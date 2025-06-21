@@ -1,15 +1,17 @@
-import { ERROR_MESSAGES } from '../config/common.js';
+import { BaseError } from '../utils/errors.js';
+import logger from '../config/logger.js';
 
 const errorHandler = (err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || ERROR_MESSAGES.SERVER_ERROR;
+  logger.error(err);
 
+  if (err instanceof BaseError) {
+    return res.status(err.statusCode).json({ error: { message: err.message } });
+  }
+
+  const statusCode = 500;
   res.status(statusCode).json({
-    error: {
-      message,
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-    },
+    error: { message: 'An unexpected error occurred on the server.' },
   });
 };
 
-export default errorHandler; 
+export default errorHandler;

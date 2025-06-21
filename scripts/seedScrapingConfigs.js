@@ -9,6 +9,7 @@ const configs = [
   {
     domain: 'demonicscans.org',
     chapterSelector: 'a.chplinks',
+    scrapingStrategy: 'dynamic',
   },
 ];
 

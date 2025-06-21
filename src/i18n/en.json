@@ -11,6 +11,16 @@
     "newChapter": {
       "subject": "New Chapter Alert for {{mangaTitle}}!",
       "body": "<h1>New Chapter Available!</h1><p>A new chapter for <strong>{{mangaTitle}}</strong> has been released!</p><p><strong>Chapter:</strong> {{chapterText}}</p><p>You can read it here: <a href='{{chapterUrl}}'>{{chapterUrl}}</a></p><br/><p>Happy reading!</p>"
+    },
+    "digest": {
+      "daily": {
+        "subject": "Your Daily Manga Updates Digest",
+        "body": "<h1>Daily Manga Digest</h1><p>Here are your updates for the day ({{count}} new chapters):</p><ul>{{#each updates}}<li><strong>{{this.mangaTitle}}</strong> - {{this.chapterText}}: <a href='{{this.chapterUrl}}'>Read here</a></li>{{/each}}</ul><br/><p>Happy reading!</p>"
+      },
+      "weekly": {
+        "subject": "Your Weekly Manga Updates Digest",
+        "body": "<h1>Weekly Manga Digest</h1><p>Here are your updates for the week ({{count}} new chapters):</p><ul>{{#each updates}}<li><strong>{{this.mangaTitle}}</strong> - {{this.chapterText}}: <a href='{{this.chapterUrl}}'>Read here</a></li>{{/each}}</ul><br/><p>Happy reading!</p>"
+      }
     }
   },
   "errors": {

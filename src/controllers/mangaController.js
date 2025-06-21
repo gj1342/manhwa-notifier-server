@@ -1,5 +1,5 @@
 import trackedMangaRepository from '../repository/trackedMangaRepository.js';
-import { scrapeLatestMangaChapter } from '../services/scraperService.js';
+import { scrapeManga } from '../services/scraperService.js';
 import { BadRequestError, NotFoundError } from '../utils/errors.js';
 import { ERROR_MESSAGES, STATUS_CODES } from '../config/common.js';
 
@@ -8,7 +8,7 @@ export const createManga = async (req, res, next) => {
     const { url, mangaTitle } = req.body;
     const userId = req.user.id;
 
-    const latestChapter = await scrapeLatestMangaChapter(url);
+    const latestChapter = await scrapeManga(url);
 
     if (!latestChapter) {
       throw new BadRequestError(ERROR_MESSAGES.WEBSITE_NOT_SUPPORTED_OR_NO_CHAPTERS);

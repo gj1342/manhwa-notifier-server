@@ -164,9 +164,19 @@ router.delete(ADMIN.USER_HARD_DELETE, adminController.hardDeleteUser);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/ScrapingConfig'
- *           example:
- *             domain: "demonicscans.org"
- *             chapterSelector: "a.chplinks"
+ *           examples:
+ *             staticSite:
+ *               summary: For a simple, static HTML website
+ *               value:
+ *                 domain: "static-manga-site.com"
+ *                 chapterSelector: ".chapter-link a"
+ *                 scrapingStrategy: "static"
+ *             dynamicSite:
+ *               summary: For a dynamic, JavaScript-rendered website
+ *               value:
+ *                 domain: "dynamic-manga-site.com"
+ *                 chapterSelector: "#chapters-list > div > a"
+ *                 scrapingStrategy: "dynamic"
  *     responses:
  *       201:
  *         description: The created scraping configuration.

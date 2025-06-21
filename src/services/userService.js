@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { ERROR_MESSAGES, BCRYPT_SALT_ROUNDS, ADMIN_CREATION_SECRET } from '../config/common.js';
 import userRepository from '../repository/userRepository.js';
 import { trimAll, generateToken } from '../utils/helpers.js';
-import { isStrongPassword } from '../utils/validation.js';
+import { isStrongPassword, isValidNotificationSettings } from '../utils/validation.js';
 import crypto from 'crypto';
 import { sendLocalizedMail } from './emailService.js';
 import BlacklistedToken from '../models/BlacklistedToken.js';
@@ -97,7 +97,7 @@ const verifyEmail = async (token) => {
   return true;
 };
 
-const updateUser = async (data, actingUser) => {
+const updateUser = async (data, actingUser, origin) => {
   const userId = data._id?.toString();
   if (!userId) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
   const trimmedData = trimAll(data);
@@ -105,10 +105,10 @@ const updateUser = async (data, actingUser) => {
   if (!existingUser) throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
   
   if (actingUser.id.toString() !== userId) {
-      throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN_ACTION);
+    throw new ForbiddenError(ERROR_MESSAGES.FORBIDDEN);
   }
   if (trimmedData.role) {
-      delete trimmedData.role;
+    delete trimmedData.role;
   }
 
   delete trimmedData._id;
@@ -116,8 +116,45 @@ const updateUser = async (data, actingUser) => {
     if (!isStrongPassword(trimmedData.password)) throw new BadRequestError(ERROR_MESSAGES.PASSWORD_REQUIREMENTS);
     trimmedData.password = await bcrypt.hash(trimmedData.password, BCRYPT_SALT_ROUNDS);
   }
+
+  if (trimmedData.email && trimmedData.email !== existingUser.email) {
+    const emailInUse = await userRepository.getUser({ email: trimmedData.email });
+    if (emailInUse) {
+      throw new ConflictError(ERROR_MESSAGES.USER_ALREADY_EXISTS);
+    }
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
+    trimmedData.isEmailVerified = false;
+    trimmedData.emailVerificationToken = verificationToken;
+    trimmedData.emailVerificationExpires = verificationExpires;
+
+    const verifyUrl = `${origin}/verify-email?token=${verificationToken}`;
+    await sendLocalizedMail({
+      to: trimmedData.email,
+      subjectKey: 'verify_subject',
+      bodyKey: 'verify_body',
+      data: { link: verifyUrl },
+      lang: existingUser.language || 'en',
+    });
+  }
+
   trimmedData.lastActive = new Date();
   return userRepository.updateUser(userId, trimmedData);
+};
+
+const updateNotificationSettings = async (userId, settings) => {
+  if (!isValidNotificationSettings(settings)) {
+    throw new BadRequestError(ERROR_MESSAGES.INVALID_NOTIFICATION_SETTINGS || 'Invalid notification settings provided.');
+  }
+
+  const user = await userRepository.getUser(userId);
+  if (!user) {
+    throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
+  }
+
+  const newSettings = { ...user.notificationSettings, ...settings };
+
+  return userRepository.updateUser(userId, { notificationSettings: newSettings });
 };
 
 const deleteUser = async (id, actingUser) => {
@@ -227,4 +264,5 @@ export default {
   verifyEmail,
   isTokenBlacklisted,
   cleanupBlacklistedTokens,
+  updateNotificationSettings,
 }; 

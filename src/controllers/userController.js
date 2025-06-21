@@ -16,8 +16,27 @@ const getMe = async (req, res, next) => {
 
 const updateMe = async (req, res, next) => {
   try {
-    const updated = await userService.updateUser({ ...req.body, _id: req.user.id }, req.user);
-    res.status(200).json(updated);
+    const { notificationSettings, ...otherUpdates } = req.body;
+    const userId = req.user.id;
+    let needsFinalFetch = false;
+
+    if (notificationSettings && Object.keys(notificationSettings).length > 0) {
+      await userService.updateNotificationSettings(userId, notificationSettings);
+      needsFinalFetch = true;
+    }
+
+    if (Object.keys(otherUpdates).length > 0) {
+      const origin = `${req.protocol}://${req.get('host')}`;
+      await userService.updateUser({ ...otherUpdates, _id: userId }, req.user, origin);
+      needsFinalFetch = true;
+    }
+
+    if (needsFinalFetch) {
+      const user = await userService.getUser(userId);
+      return res.status(200).json(user);
+    }
+
+    res.status(200).json({ message: 'No profile data was updated.' });
   } catch (err) {
     next(err);
   }

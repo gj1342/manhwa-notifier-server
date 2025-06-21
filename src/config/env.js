@@ -9,4 +9,5 @@ export const {
   SERVER_URL,
   ADMIN_CREATION_SECRET,
   JWT_EXPIRES_IN,
+  PROXY_LIST,
 } = process.env;

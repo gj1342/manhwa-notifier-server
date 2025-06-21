@@ -59,8 +59,10 @@
 import { Router } from 'express';
 import userController from '../controllers/userController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
+import { API_ENDPOINTS } from '../config/endpoints.js';
 
 const router = Router();
+const { USERS } = API_ENDPOINTS;
 
 /**
  * @swagger
@@ -80,7 +82,7 @@ const router = Router();
  *       404:
  *         description: User not found
  */
-router.get('/me', authMiddleware, userController.getMe);
+router.get(USERS.ME, authMiddleware, userController.getMe);
 
 /**
  * @swagger
@@ -106,7 +108,7 @@ router.get('/me', authMiddleware, userController.getMe);
  *       404:
  *         description: User not found
  */
-router.put('/me', authMiddleware, userController.updateMe);
+router.put(USERS.ME, authMiddleware, userController.updateMe);
 
 /**
  * @swagger
@@ -122,6 +124,6 @@ router.put('/me', authMiddleware, userController.updateMe);
  *       404:
  *         description: User not found
  */
-router.delete('/me', authMiddleware, userController.deleteMe);
+router.delete(USERS.ME, authMiddleware, userController.deleteMe);
 
 export default router; 

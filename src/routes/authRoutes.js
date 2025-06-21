@@ -19,6 +19,7 @@ import { validationResult } from 'express-validator';
 import { API_ENDPOINTS } from '../config/endpoints.js';
 import { authRateLimiter } from '../middleware/rateLimiter.js';
 import authMiddleware from '../middleware/authMiddleware.js';
+import handleValidationErrors from '../middleware/validationHandler.js';
 
 const router = Router();
 
@@ -47,13 +48,8 @@ router.post(
   API_ENDPOINTS.AUTH.REGISTER,
   authRateLimiter,
   registerValidation,
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    register(req, res, next);
-  }
+  handleValidationErrors,
+  register
 );
 
 /**

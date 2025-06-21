@@ -4,20 +4,25 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import User from '../src/models/User.js';
 import { isStrongPassword } from '../src/utils/validation.js';
-import { BCRYPT_SALT_ROUNDS, MONGODB_URI } from '../src/config/common.js';
+import {
+  BCRYPT_SALT_ROUNDS,
+  MONGODB_URI,
+  SEED_MESSAGES,
+  LOG_MESSAGES,
+} from '../src/config/common.js';
 
 dotenv.config({ path: './.env' });
 
 const connectDB = async () => {
   try {
     if (!MONGODB_URI) {
-      console.error('MongoDB URI not found. Please set MONGODB_URI in your .env file.');
+      console.error(LOG_MESSAGES.DB_URI_NOT_FOUND);
       process.exit(1);
     }
     await mongoose.connect(MONGODB_URI);
-    console.log('MongoDB connected successfully.');
+    console.log(LOG_MESSAGES.DB_CONNECTED);
   } catch (err) {
-    console.error('MongoDB connection error:', err.message);
+    console.error(LOG_MESSAGES.DB_CONNECTION_ERROR, err.message);
     process.exit(1);
   }
 };
@@ -30,27 +35,27 @@ const createAdmin = async () => {
       {
         type: 'text',
         name: 'email',
-        message: 'Enter admin email:',
-        validate: value => (/.+@.+\..+/.test(value) ? true : 'Invalid email format.'),
+        message: SEED_MESSAGES.ADMIN_EMAIL_PROMPT,
+        validate: (value) => (/.+@.+\..+/.test(value) ? true : SEED_MESSAGES.INVALID_EMAIL_FORMAT),
       },
       {
         type: 'password',
         name: 'password',
-        message: 'Enter admin password:',
-        validate: value => (isStrongPassword(value) ? true : 'Password does not meet strength requirements.'),
+        message: SEED_MESSAGES.ADMIN_PASSWORD_PROMPT,
+        validate: (value) => (isStrongPassword(value) ? true : SEED_MESSAGES.PASSWORD_STRENGTH_FAIL),
       },
     ]);
 
     const { email, password } = response;
 
     if (!email || !password) {
-      console.log('Admin creation cancelled.');
+      console.log(SEED_MESSAGES.ADMIN_CREATION_CANCELLED);
       return;
     }
 
     const existingAdmin = await User.findOne({ email });
     if (existingAdmin) {
-      console.error('An admin with this email already exists.');
+      console.error(SEED_MESSAGES.ADMIN_ALREADY_EXISTS);
       return;
     }
 
@@ -63,12 +68,12 @@ const createAdmin = async () => {
       isEmailVerified: true,
     });
 
-    console.log('Admin user created successfully!');
+    console.log(SEED_MESSAGES.ADMIN_CREATED_SUCCESS);
   } catch (error) {
-    console.error('Error creating admin user:', error.message);
+    console.error(SEED_MESSAGES.ADMIN_CREATION_ERROR, error.message);
   } finally {
     await mongoose.disconnect();
-    console.log('MongoDB disconnected.');
+    console.log(LOG_MESSAGES.DB_DISCONNECTED);
   }
 };
 

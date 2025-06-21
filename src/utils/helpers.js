@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import jwtConfig from '../config/jwt.js';
+import { JWT_SECRET, JWT_EXPIRES_IN } from '../config/common.js';
 
 export const absoluteUrl = (relativeUrl, baseUrl) => new URL(relativeUrl, baseUrl).href;
 
@@ -16,7 +16,7 @@ export const trimAll = (obj) => {
   return trimmed;
 };
 
-export const generateToken = (payload) => jwt.sign(payload, jwtConfig.secret, { expiresIn: jwtConfig.expiresIn });
+export const generateToken = (payload) => jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
 export const renderTemplate = (template, data) => {
   return template.replace(/{{(\w+)}}/g, (_, key) => data[key] || '');

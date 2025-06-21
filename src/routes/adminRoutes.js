@@ -6,8 +6,12 @@
  */
 import { Router } from 'express';
 import adminController from '../controllers/adminController.js';
+import { scrapingConfigValidation } from '../middleware/validation.js';
+import handleValidationErrors from '../middleware/validationHandler.js';
+import { API_ENDPOINTS } from '../config/endpoints.js';
 
 const router = Router();
+const { ADMIN } = API_ENDPOINTS;
 
 /**
  * @swagger
@@ -60,7 +64,7 @@ const router = Router();
  *               items:
  *                 $ref: '#/components/schemas/User'
  */
-router.get('/users', adminController.listUsers);
+router.get(ADMIN.USERS, adminController.listUsers);
 
 /**
  * @swagger
@@ -82,7 +86,7 @@ router.get('/users', adminController.listUsers);
  *             schema:
  *               $ref: '#/components/schemas/User'
  */
-router.get('/users/:id', adminController.getUserById);
+router.get(ADMIN.USER_BY_ID, adminController.getUserById);
 
 /**
  * @swagger
@@ -110,7 +114,7 @@ router.get('/users/:id', adminController.getUserById);
  *             schema:
  *               $ref: '#/components/schemas/User'
  */
-router.put('/users/:id', adminController.updateUser);
+router.put(ADMIN.USER_BY_ID, adminController.updateUser);
 
 /**
  * @swagger
@@ -128,7 +132,7 @@ router.put('/users/:id', adminController.updateUser);
  *       200:
  *         description: Confirmation message.
  */
-router.delete('/users/:id', adminController.softDeleteUser);
+router.delete(ADMIN.USER_BY_ID, adminController.softDeleteUser);
 
 /**
  * @swagger
@@ -146,6 +150,40 @@ router.delete('/users/:id', adminController.softDeleteUser);
  *       200:
  *         description: Confirmation message.
  */
-router.delete('/users/:id/hard-delete', adminController.hardDeleteUser);
+router.delete(ADMIN.USER_HARD_DELETE, adminController.hardDeleteUser);
+
+/**
+ * @swagger
+ * /admin/scraping-configs:
+ *   post:
+ *     summary: Create a new scraping configuration (admin only)
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ScrapingConfig'
+ *           example:
+ *             domain: "demonicscans.org"
+ *             chapterSelector: "a.chplinks"
+ *     responses:
+ *       201:
+ *         description: The created scraping configuration.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ScrapingConfig'
+ *       400:
+ *         description: Bad request (e.g., validation error).
+ *       409:
+ *         description: Conflict (domain already exists).
+ */
+router.post(
+  ADMIN.SCRAPING_CONFIGS,
+  scrapingConfigValidation,
+  handleValidationErrors,
+  adminController.createScrapingConfig
+);
 
 export default router; 

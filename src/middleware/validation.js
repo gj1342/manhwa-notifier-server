@@ -10,4 +10,9 @@ export const trackedMangaValidation = [
   body('url').isURL().withMessage(VALIDATION_MESSAGES.URL_REQUIRED),
   body('mangaTitle').notEmpty().withMessage(VALIDATION_MESSAGES.MANGA_TITLE_REQUIRED),
   body('notificationEnabled').optional().isBoolean().withMessage(VALIDATION_MESSAGES.NOTIFICATION_BOOLEAN),
+];
+
+export const scrapingConfigValidation = [
+  body('domain').isURL().withMessage(VALIDATION_MESSAGES.URL_REQUIRED),
+  body('chapterSelector').notEmpty().withMessage(VALIDATION_MESSAGES.SELECTOR_REQUIRED),
 ]; 

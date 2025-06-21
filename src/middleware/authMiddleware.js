@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
-import jwtConfig from '../config/jwt.js';
 import { UnauthorizedError } from '../utils/errors.js';
-import { ERROR_MESSAGES } from '../config/common.js';
+import { ERROR_MESSAGES, JWT_SECRET } from '../config/common.js';
 
 const authMiddleware = (req, res, next) => {
   try {
@@ -11,7 +10,7 @@ const authMiddleware = (req, res, next) => {
       throw new UnauthorizedError(ERROR_MESSAGES.NO_TOKEN_PROVIDED);
     }
 
-    const decoded = jwt.verify(token, jwtConfig.secret);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {

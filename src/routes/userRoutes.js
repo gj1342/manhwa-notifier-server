@@ -45,22 +45,38 @@
  *       properties:
  *         email:
  *           type: string
+ *           description: "A new email address. If provided, email verification will be required."
+ *           example: "new.user@example.com"
  *         password:
  *           type: string
  *           format: password
+ *           description: "A new, strong password. Must meet complexity requirements."
+ *           example: "NewStrongPassword123!"
+ *         language:
+ *           type: string
+ *           description: "The user's preferred language for emails."
+ *           enum: [en, es]
+ *           example: "en"
  *         notificationSettings:
  *           type: object
  *           properties:
  *             frequency:
  *               type: string
+ *               enum: [instant, daily, weekly]
+ *               description: "The frequency of update notifications."
+ *               example: "daily"
  *             emailEnabled:
  *               type: boolean
+ *               description: "A global toggle to enable or disable all email notifications."
+ *               example: true
  */
 import { Router } from 'express';
 import userController from '../controllers/userController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
+import { API_ENDPOINTS } from '../config/endpoints.js';
 
 const router = Router();
+const { USERS } = API_ENDPOINTS;
 
 /**
  * @swagger
@@ -80,13 +96,14 @@ const router = Router();
  *       404:
  *         description: User not found
  */
-router.get('/me', authMiddleware, userController.getMe);
+router.get(USERS.ME, authMiddleware, userController.getMe);
 
 /**
  * @swagger
  * /users/me:
  *   put:
  *     summary: Update the authenticated user's profile
+ *     description: "Update the user's email, password, language, or notification settings. Any field provided will be updated."
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -96,6 +113,21 @@ router.get('/me', authMiddleware, userController.getMe);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/UserUpdate'
+ *           examples:
+ *             fullUpdate:
+ *               summary: Update all settings
+ *               value:
+ *                 email: "new.email@example.com"
+ *                 password: "NewPassword123!"
+ *                 language: "en"
+ *                 notificationSettings:
+ *                   frequency: "daily"
+ *                   emailEnabled: true
+ *             partialUpdate:
+ *               summary: Update only notification frequency
+ *               value:
+ *                 notificationSettings:
+ *                   frequency: "weekly"
  *     responses:
  *       200:
  *         description: User updated
@@ -106,7 +138,7 @@ router.get('/me', authMiddleware, userController.getMe);
  *       404:
  *         description: User not found
  */
-router.put('/me', authMiddleware, userController.updateMe);
+router.put(USERS.ME, authMiddleware, userController.updateMe);
 
 /**
  * @swagger
@@ -122,6 +154,6 @@ router.put('/me', authMiddleware, userController.updateMe);
  *       404:
  *         description: User not found
  */
-router.delete('/me', authMiddleware, userController.deleteMe);
+router.delete(USERS.ME, authMiddleware, userController.deleteMe);
 
 export default router; 

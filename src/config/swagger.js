@@ -1,29 +1,25 @@
 import swaggerJsdoc from 'swagger-jsdoc';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const serverUrl = process.env.SERVER_URL;
+import { SERVER_URL, SWAGGER_CONFIG } from './common.js';
 
 const swaggerOptions = {
   definition: {
-    openapi: '3.0.0',
+    openapi: SWAGGER_CONFIG.OPENAPI_VERSION,
     info: {
-      title: 'Manhwa Notifier API',
-      version: '1.0.0',
-      description: 'API documentation for the Manhwa Notifier backend',
+      title: SWAGGER_CONFIG.API_TITLE,
+      version: SWAGGER_CONFIG.API_VERSION,
+      description: SWAGGER_CONFIG.API_DESCRIPTION,
     },
     servers: [
       {
-        url: `${serverUrl}/api`,
+        url: `${SERVER_URL}${SWAGGER_CONFIG.API_BASE_PATH}`,
       },
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
+          type: SWAGGER_CONFIG.SECURITY_SCHEME_TYPE,
+          scheme: SWAGGER_CONFIG.SECURITY_SCHEME,
+          bearerFormat: SWAGGER_CONFIG.BEARER_FORMAT,
         },
       },
     },
@@ -33,7 +29,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./src/routes/*.js'],
+  apis: [SWAGGER_CONFIG.APIS_PATH],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);

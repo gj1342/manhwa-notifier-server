@@ -13,6 +13,7 @@ const userSchema = new Schema(
     emailVerificationToken: { type: String },
     emailVerificationExpires: { type: Date },
     deleted: { type: Boolean, default: false },
+    language: { type: String, default: 'en' },
     notificationSettings: {
       frequency: { type: String, default: 'instant' },
       emailEnabled: { type: Boolean, default: true },

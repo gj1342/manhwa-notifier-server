@@ -1,5 +1,6 @@
 import winston from 'winston';
 import { NODE_ENV } from './env.js';
+import { LOGGER_CONFIG } from './common.js';
 
 const { combine, timestamp, printf, colorize, splat, json } = winston.format;
 
@@ -20,42 +21,42 @@ const transports = [
   new winston.transports.Console({
     format: combine(
       colorize(),
-      timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      timestamp({ format: LOGGER_CONFIG.TIMESTAMP_FORMAT }),
       splat(),
       consoleFormat
     ),
-    level: 'info',
+    level: LOGGER_CONFIG.LEVEL_INFO,
   }),
 ];
 
-if (NODE_ENV === 'production') {
+if (NODE_ENV === LOGGER_CONFIG.PROD_ENV) {
   transports.push(
     new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
+      filename: LOGGER_CONFIG.PROD_LOG_ERROR,
+      level: LOGGER_CONFIG.LEVEL_ERROR,
       format: combine(timestamp(), json()),
     }),
     new winston.transports.File({
-      filename: 'logs/combined.log',
+      filename: LOGGER_CONFIG.PROD_LOG_COMBINED,
       format: combine(timestamp(), json()),
     })
   );
 } else {
   transports.push(
     new winston.transports.File({
-      filename: 'logs/dev-error.log',
-      level: 'error',
+      filename: LOGGER_CONFIG.DEV_LOG_ERROR,
+      level: LOGGER_CONFIG.LEVEL_ERROR,
       format: combine(timestamp(), splat(), fileFormat),
     }),
     new winston.transports.File({
-      filename: 'logs/dev-combined.log',
+      filename: LOGGER_CONFIG.DEV_LOG_COMBINED,
       format: combine(timestamp(), splat(), fileFormat),
     })
   );
 }
 
 const logger = winston.createLogger({
-  level: NODE_ENV === 'production' ? 'info' : 'debug',
+  level: NODE_ENV === LOGGER_CONFIG.PROD_ENV ? LOGGER_CONFIG.LEVEL_INFO : LOGGER_CONFIG.LEVEL_DEBUG,
   transports,
   exitOnError: false,
 });

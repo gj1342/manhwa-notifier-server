@@ -2,6 +2,15 @@ import adminService from '../services/adminService.js';
 import { NotFoundError } from '../utils/errors.js';
 import { ERROR_MESSAGES, RESPONSE_MESSAGES } from '../config/common.js';
 
+const createScrapingConfig = async (req, res, next) => {
+  try {
+    const config = await adminService.createScrapingConfig(req.body);
+    res.status(201).json(config);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const listUsers = async (req, res, next) => {
   try {
     const result = await adminService.getAllUsers(req.query);
@@ -48,6 +57,7 @@ const hardDeleteUser = async (req, res, next) => {
 };
 
 export default {
+  createScrapingConfig,
   listUsers,
   getUserById,
   updateUser,

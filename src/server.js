@@ -1,16 +1,25 @@
+import './config/env.js';
 import http from 'http';
-import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import app from './app.js';
-
-dotenv.config();
+import logger from './config/logger.js';
+import mangaUpdateChecker from './jobs/mangaUpdateChecker.js';
+import digestSender from './jobs/digestSender.js';
 
 const PORT = process.env.PORT || 5000;
 
-(async () => {
-  await connectDB();
+const startServer = async () => {
+  try {
+    await connectDB();
+    http.createServer(app).listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+      mangaUpdateChecker.start();
+      digestSender.start();
+    });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
 
-  http.createServer(app).listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-})(); 
+startServer(); 

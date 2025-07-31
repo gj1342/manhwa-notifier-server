@@ -1,0 +1,8 @@
+{
+  "email": {
+    "verify_subject": "Verifica tu correo electrónico",
+    "verify_body": "<p>Hola,</p><p>Por favor verifica tu correo haciendo clic en el botón de abajo:</p><p><a href='{{link}}' style='background:#1976d2;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;'>Verificar correo</a></p><p>Si no solicitaste esto, puedes ignorar este correo.</p>",
+    "reset_subject": "Restablecer contraseña",
+    "reset_body": "<p>Hola,</p><p>Solicitaste restablecer tu contraseña. Usa el siguiente código para restablecerla:</p><p><b>{{token}}</b></p><p>Si no solicitaste esto, puedes ignorar este correo.</p>"
+  }
+} 

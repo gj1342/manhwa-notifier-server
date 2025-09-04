@@ -9,6 +9,10 @@ import adminMiddleware from '../middleware/adminMiddleware.js';
 
 const router = Router();
 
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 router.use('/auth', authRoutes);
 router.use('/manga', checkTokenBlacklist, mangaRoutes);
 router.use('/users', userRoutes);

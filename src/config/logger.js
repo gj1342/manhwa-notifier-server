@@ -1,4 +1,5 @@
 import winston from 'winston';
+import fs from 'fs';
 import { NODE_ENV } from './env.js';
 import { LOGGER_CONFIG } from './common.js';
 
@@ -30,6 +31,10 @@ const transports = [
 ];
 
 if (NODE_ENV === LOGGER_CONFIG.PROD_ENV) {
+  try {
+    const dirProd = (LOGGER_CONFIG.PROD_LOG_COMBINED || '').split('/').slice(0, -1).join('/');
+    if (dirProd) fs.mkdirSync(dirProd, { recursive: true });
+  } catch {}
   transports.push(
     new winston.transports.File({
       filename: LOGGER_CONFIG.PROD_LOG_ERROR,
@@ -42,6 +47,10 @@ if (NODE_ENV === LOGGER_CONFIG.PROD_ENV) {
     })
   );
 } else {
+  try {
+    const dirDev = (LOGGER_CONFIG.DEV_LOG_COMBINED || '').split('/').slice(0, -1).join('/');
+    if (dirDev) fs.mkdirSync(dirDev, { recursive: true });
+  } catch {}
   transports.push(
     new winston.transports.File({
       filename: LOGGER_CONFIG.DEV_LOG_ERROR,

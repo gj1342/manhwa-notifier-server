@@ -10,4 +10,5 @@ export const {
   ADMIN_CREATION_SECRET,
   JWT_EXPIRES_IN,
   PROXY_LIST,
+  CORS_ORIGIN,
 } = process.env;

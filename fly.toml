@@ -16,25 +16,6 @@ primary_region = "iad"
   size = "shared-cpu-1x"
   memory = "512mb"
 
-[[services]]
-  http_checks = []
-  internal_port = 5000
-  protocol = "tcp"
-  script_checks = []
-  [services.concurrency]
-    hard_limit = 100
-    soft_limit = 80
-    type = "connections"
-  [[services.ports]]
-    handlers = ["http"]
-    port = 80
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
-  [services.tcp_checks]
-    interval = "15s"
-    timeout = "2s"
-
 [[checks]]
   name = "health"
   type = "http"
